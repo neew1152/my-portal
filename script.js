@@ -4,9 +4,9 @@ pdfjsLib.GlobalWorkerOptions.workerSrc =
 
 const GITHUB_USERNAME = "neew1152";
 
-// State Management - Set "recommended" as the default active filter
+// State Management
 let currentTab = "repos";
-let currentFilter = "recommended";
+let currentFilter = "all";
 
 let reposData = [];
 let certsData = [];
@@ -25,8 +25,7 @@ function setupTabs() {
       tabs.forEach((t) => t.classList.remove("active"));
       tab.classList.add("active");
       currentTab = tab.dataset.tab;
-      // Default to "recommended" for Repos/Certs and "all" for Gists
-      currentFilter = currentTab === "gists" ? "all" : "recommended";
+      currentFilter = "all";
       renderFilterBar();
       renderContent();
     });
@@ -42,18 +41,17 @@ async function loadData() {
     const [reposResponse, certsResponse, gistsResponse] =
       await Promise.allSettled([
         fetch(
-          `https://api.github.com/users/${GITHUB_USERNAME}/repos?sort=updated&per_page=100`,
+          `https://api.github.com/users/${GITHUB_USERNAME}/repos?sort=updated&per_page=100`
         ),
         fetch("data.json"),
         fetch(
-          `https://api.github.com/users/${GITHUB_USERNAME}/gists?per_page=100`,
+          `https://api.github.com/users/${GITHUB_USERNAME}/gists?per_page=100`
         ),
       ]);
 
     if (reposResponse.status === "fulfilled" && reposResponse.value.ok) {
       const rawRepos = await reposResponse.value.json();
       reposData = rawRepos.filter((repo) => !repo.fork);
-      // Fetch README image previews for repos asynchronously
       fetchRepoReadmeImages();
     }
 
@@ -76,7 +74,7 @@ async function loadData() {
           filename: firstFile,
           description: gist.description || "",
           html_url: gist.html_url,
-          category: categorizeGist(firstFile, gist.description),
+          categories: categorizeGist(firstFile, gist.description), // Array of categories
         };
       });
     }
@@ -94,18 +92,17 @@ async function fetchRepoReadmeImages() {
   for (const repo of reposData) {
     try {
       const readmeRes = await fetch(
-        `https://raw.githubusercontent.com/${repo.full_name}/${repo.default_branch}/README.md`,
+        `https://raw.githubusercontent.com/${repo.full_name}/${repo.default_branch}/README.md`
       );
       if (readmeRes.ok) {
         const markdown = await readmeRes.text();
         const imageUrl = extractFirstImageUrl(
           markdown,
           repo.full_name,
-          repo.default_branch,
+          repo.default_branch
         );
         if (imageUrl) {
           repo.preview_image = imageUrl;
-          // Re-render if currently viewing repos
           if (currentTab === "repos") renderContent();
         }
       }
@@ -138,54 +135,66 @@ function extractFirstImageUrl(markdown, repoFullName, defaultBranch) {
   return `https://raw.githubusercontent.com/${repoFullName}/${defaultBranch}/${cleanPath}`;
 }
 
-// Categorize Gists into Android, Security, Tools, Guides
+/**
+ * Categorize Gists into multiple tags (Android, Security, Tools, Guides).
+ * Returns an array of category strings.
+ */
 function categorizeGist(filename, description = "") {
   const fn = filename.toLowerCase();
   const desc = (description || "").toLowerCase();
   const text = `${fn} ${desc}`;
+  const categories = [];
 
-  // 1. Android Category
-  if (fn.startsWith("custom-android") || text.includes("android")) {
-    return "Android";
+  if (text.includes("android") || text.includes("custom-android")) {
+    categories.push("Android");
   }
 
-  // 2. Security Category
   if (
-    fn.startsWith("analysis") ||
-    fn.startsWith("incident") ||
+    text.includes("analysis") ||
+    text.includes("incident") ||
     text.includes("security") ||
-    text.includes("censorship")
+    text.includes("censorship") ||
+    text.includes("vulnerability") ||
+    text.includes("exploit")
   ) {
-    return "Security";
+    categories.push("Security");
   }
 
-  // 3. Tools Category
   if (
     fn.endsWith(".py") ||
     fn.endsWith(".sh") ||
-    fn.includes("tools") ||
-    text.includes("tool")
+    text.includes("tools") ||
+    text.includes("tool") ||
+    text.includes("script")
   ) {
-    return "Tools";
+    categories.push("Tools");
   }
 
-  // 4. Default / Guides Category
-  return "Guides";
+  if (
+    text.includes("guide") ||
+    text.includes("tutorial") ||
+    text.includes("notes") ||
+    text.includes("cheatsheet") ||
+    text.includes("custom-android")
+  ) {
+    categories.push("Guides");
+  }
+
+  // Fallback category if no conditions matched
+  if (categories.length === 0) {
+    categories.push("Guides");
+  }
+
+  return categories;
 }
 
-// Render dynamic sub-filter buttons with "Recommended" listed first
+// Render dynamic sub-filter category buttons for Gists
 function renderFilterBar() {
   const filterBar = document.getElementById("filter-bar");
   let filters = [];
 
-  if (currentTab === "repos" || currentTab === "certs") {
+  if (currentTab === "gists") {
     filters = [
-      { id: "recommended", label: "⭐ Recommended" },
-      { id: "all", label: "📁 All" },
-    ];
-  } else if (currentTab === "gists") {
-    filters = [
-      { id: "all", label: "📁 All" },
       { id: "Android", label: "📱 Android" },
       { id: "Security", label: "🛡️ Security" },
       { id: "Guides", label: "📖 Guides" },
@@ -193,19 +202,27 @@ function renderFilterBar() {
     ];
   }
 
+  if (filters.length === 0) {
+    filterBar.style.display = "none";
+    filterBar.innerHTML = "";
+    return;
+  }
+
+  filterBar.style.display = "flex";
   filterBar.innerHTML = filters
     .map(
       (f) => `
     <button class="pill-btn ${currentFilter === f.id ? "active" : ""}" onclick="setFilter('${f.id}')">
       ${f.label}
     </button>
-  `,
+  `
     )
     .join("");
 }
 
 function setFilter(filterId) {
-  currentFilter = filterId;
+  // Toggle filter off if clicked again
+  currentFilter = currentFilter === filterId ? "all" : filterId;
   renderFilterBar();
   renderContent();
 }
@@ -224,7 +241,7 @@ function renderContent() {
   }
 }
 
-// 1. Render Repositories (Recommended first)
+// 1. Render Repositories
 function renderRepos(grid) {
   let filtered = [...reposData];
   const isRepoRecommended = (r) =>
@@ -233,13 +250,7 @@ function renderRepos(grid) {
     r.topics?.includes("recommended") ||
     r.description?.toLowerCase().includes("recommend");
 
-  if (currentFilter === "recommended") {
-    filtered = filtered.filter(isRepoRecommended);
-    if (filtered.length === 0) filtered = reposData.slice(0, 6); // Fallback top repos
-  } else {
-    // Sort recommended items to the top when viewing "All"
-    filtered.sort((a, b) => (isRepoRecommended(b) ? 1 : 0) - (isRepoRecommended(a) ? 1 : 0));
-  }
+  filtered.sort((a, b) => (isRepoRecommended(b) ? 1 : 0) - (isRepoRecommended(a) ? 1 : 0));
 
   filtered.forEach((repo) => {
     const card = document.createElement("a");
@@ -249,7 +260,7 @@ function renderRepos(grid) {
 
     const previewMedia = repo.preview_image
       ? `<img src="${repo.preview_image}" alt="${repo.name}" loading="lazy">`
-      : `<div class="card-preview-fallback">💻 <span>${repo.language || "Code"}</span></div>`;
+      : `<div class="card-preview-fallback">💻 <span>Code</span></div>`;
 
     const isRecommended = isRepoRecommended(repo);
     const badgeHtml = isRecommended ? `<span class="badge badge-recommend">⭐ Recommended</span>` : "";
@@ -262,10 +273,6 @@ function renderRepos(grid) {
           ${badgeHtml}
         </div>
         <p class="card-desc">${repo.description || "No description provided."}</p>
-        <div class="card-footer">
-          <span>${repo.language ? "⚡ " + repo.language : "🔗 GitHub"}</span>
-          <span>Updated ${new Date(repo.updated_at).toLocaleDateString()}</span>
-        </div>
       </div>
     `;
 
@@ -273,18 +280,12 @@ function renderRepos(grid) {
   });
 }
 
-// 2. Render Certificates (Recommended first)
+// 2. Render Certificates
 function renderCertificates(grid) {
   let filtered = [...certsData];
   const isCertRecommended = (c) => c.recommended || c.isRecommended;
 
-  if (currentFilter === "recommended") {
-    filtered = filtered.filter(isCertRecommended);
-    if (filtered.length === 0) filtered = certsData;
-  } else {
-    // Sort recommended certificates to the top when viewing "All"
-    filtered.sort((a, b) => (isCertRecommended(b) ? 1 : 0) - (isCertRecommended(a) ? 1 : 0));
-  }
+  filtered.sort((a, b) => (isCertRecommended(b) ? 1 : 0) - (isCertRecommended(a) ? 1 : 0));
 
   if (filtered.length === 0) {
     grid.innerHTML = `<div class="loading-state">No certificates found.</div>`;
@@ -356,11 +357,13 @@ function renderPdfToCanvas(url, canvasId) {
     .catch((err) => console.error("PDF preview error:", err));
 }
 
-// 3. Render GitHub Gists
+// 3. Render GitHub Gists (Supports Multiple Tags)
 function renderGists(grid) {
   let filtered = gistsData;
+
+  // Filter if gist's categories array contains active filter
   if (currentFilter !== "all") {
-    filtered = gistsData.filter((g) => g.category === currentFilter);
+    filtered = gistsData.filter((g) => g.categories.includes(currentFilter));
   }
 
   if (filtered.length === 0) {
@@ -374,16 +377,20 @@ function renderGists(grid) {
     card.target = "_blank";
     card.className = "card";
 
-    const categoryClass = `badge-${gist.category.toLowerCase()}`;
+    // Generate badge HTML for each tag in gist.categories
+    const badgesHtml = gist.categories
+      .map((cat) => {
+        const categoryClass = `badge-${cat.toLowerCase()}`;
+        return `<span class="badge ${categoryClass}">${cat}</span>`;
+      })
+      .join("");
 
-    // Remove file extension (.md, .py, etc.) and replace '-' or '_' with spaces
     const titleWithoutExt =
       gist.filename.lastIndexOf(".") !== -1
         ? gist.filename.substring(0, gist.filename.lastIndexOf("."))
         : gist.filename;
     const cleanTitle = titleWithoutExt.replace(/[-_]/g, " ");
 
-    // Only render description if it exists and isn't just the filename
     const rawDesc = (gist.description || "").trim();
     const isFilenameDesc =
       !rawDesc ||
@@ -397,8 +404,7 @@ function renderGists(grid) {
     card.innerHTML = `
       <div class="card-body">
         <div class="card-header-row">
-          <span class="badge ${categoryClass}">${gist.category}</span>
-          <span style="font-size:0.75rem; color:var(--text-muted);">Gist</span>
+          <div class="card-badges">${badgesHtml}</div>
         </div>
         <h3 class="card-title" style="margin-top:8px;">${cleanTitle}</h3>
         ${descHtml}

@@ -302,6 +302,13 @@ body {
   white-space: nowrap;
 }
 
+/* Card Badges Container */
+.card-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
 .badge-security { background-color: rgba(239, 68, 68, 0.15); color: var(--badge-security); }
 .badge-android  { background-color: rgba(16, 185, 129, 0.15); color: var(--badge-android); }
 .badge-guides   { background-color: rgba(245, 158, 11, 0.15); color: var(--badge-guides); }
