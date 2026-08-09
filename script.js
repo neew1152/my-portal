@@ -1,103 +1,80 @@
-document.addEventListener("DOMContentLoaded", () => {
-    const grid = document.getElementById('cert-grid');
-    const instruction = document.querySelector('.instruction');
-    const folderPath = 'assets/certs/';
+// Configure PDF.js worker
+pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
 
-    fetch('certs.json')
-        .then(response => response.json())
-        .then(files => {
-            instruction.textContent = `${files.length} Certificates found.`;
-            
-            files.forEach((filename, index) => {
-                // 1. Clean up the name for display
-                let displayName = filename.split('.').slice(0, -1).join('.');
-                displayName = displayName.replace(/[-_]/g, ' ');
-                displayName = displayName.replace(/\b\w/g, l => l.toUpperCase());
+document.addEventListener('DOMContentLoaded', () => {
+  const grid = document.getElementById('preview-grid');
 
-                // 2. Determine file type
-                const extension = filename.split('.').pop().toLowerCase();
-                const fileUrl = `${folderPath}${filename}`;
-                
-                // 3. Create the Card Structure
-                const card = document.createElement('div');
-                card.classList.add('cert-card');
+  fetch('data.json')
+    .then(response => {
+      if (!response.ok) throw new Error('Failed to load JSON');
+      return response.json();
+    })
+    .then(data => {
+      grid.innerHTML = ''; 
 
-                // We create a unique ID for the container so we can inject the image/canvas later
-                const containerId = `preview-${index}`;
+      data.forEach((item, index) => {
+        const filePath = `assets/certs/${item.filename}`;
+        const title = item.filename.substring(0, item.filename.lastIndexOf('.')) || item.filename;
+        const extension = item.filename.split('.').pop().toLowerCase();
 
-                card.innerHTML = `
-                    <div class="card-content">
-                        <a href="${fileUrl}" target="_blank" class="preview-container" id="${containerId}">
-                            <!-- Content injected via JS below -->
-                            <div class="loading-spinner">Loading...</div>
-                        </a>
-                        <h3>${displayName}</h3>
-                        <p class="file-type">${extension.toUpperCase()} FILE</p>
-                    </div>
-                `;
+        const card = document.createElement('a');
+        card.href = filePath;
+        card.target = '_blank';
+        card.className = 'card';
 
-                grid.appendChild(card);
+        let previewMedia = '';
+        const canvasId = `pdf-canvas-${index}`;
+        
+        if (['png', 'jpg', 'jpeg', 'webp', 'gif'].includes(extension)) {
+          previewMedia = `<img src="${filePath}" alt="${title}">`;
+        } else if (extension === 'pdf') {
+          // Render PDF onto Canvas (No dark browser margins!)
+          previewMedia = `<canvas id="${canvasId}" class="pdf-canvas"></canvas>`;
+        } else {
+          previewMedia = `<div class="file-icon">📁 ${extension.toUpperCase()}</div>`;
+        }
 
-                // 4. Handle Logic: Image vs PDF
-                const container = document.getElementById(containerId);
+        card.innerHTML = `
+          <div class="card-preview">
+            ${previewMedia}
+          </div>
+          <div class="card-body">
+            <h3 class="card-title">${title}</h3>
+            <p class="card-desc">${item.description}</p>
+          </div>
+        `;
 
-                if (['png', 'jpg', 'jpeg', 'gif'].includes(extension)) {
-                    // Standard Image
-                    container.innerHTML = `<img src="${fileUrl}" alt="${displayName}" loading="lazy">`;
-                } 
-                else if (extension === 'pdf') {
-                    // Render PDF to Canvas
-                    renderPDFToCanvas(fileUrl, container);
-                } 
-                else {
-                    // Fallback
-                    container.innerHTML = `<div class="pdf-preview"><i class="fas fa-file"></i></div>`;
-                }
-            });
-        })
-        .catch(error => {
-            console.error('Error loading certs:', error);
-            instruction.textContent = "Error loading certificate list.";
-        });
+        grid.appendChild(card);
+
+        // Render PDF page 1 to Canvas
+        if (extension === 'pdf') {
+          renderPdfToCanvas(filePath, canvasId);
+        }
+      });
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      grid.innerHTML = `<p style="color:red;">Unable to load data. Make sure you are using Live Server.</p>`;
+    });
 });
 
-// Helper function to render PDF
-async function renderPDFToCanvas(url, container) {
-    try {
-        // Load the PDF
-        const loadingTask = pdfjsLib.getDocument(url);
-        const pdf = await loadingTask.promise;
-        
-        // Fetch the first page
-        const page = await pdf.getPage(1);
-        
-        // Prepare canvas
-        const canvas = document.createElement('canvas');
-        const context = canvas.getContext('2d');
-        
-        // Define scale (quality) - 1.5 is a good balance for thumbnails
-        const viewport = page.getViewport({ scale: 1.5 });
+// Converts PDF Page 1 to an Image Canvas
+function renderPdfToCanvas(url, canvasId) {
+  pdfjsLib.getDocument(url).promise.then(pdf => {
+    pdf.getPage(1).then(page => {
+      const canvas = document.getElementById(canvasId);
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      
+      // High-resolution scale for sharp image quality
+      const viewport = page.getViewport({ scale: 1.5 });
+      canvas.height = viewport.height;
+      canvas.width = viewport.width;
 
-        canvas.height = viewport.height;
-        canvas.width = viewport.width;
-        
-        // Clear "Loading..." text and append canvas
-        container.innerHTML = ''; 
-        container.appendChild(canvas);
-
-        // Render page into canvas context
-        const renderContext = {
-            canvasContext: context,
-            viewport: viewport
-        };
-        await page.render(renderContext).promise;
-
-    } catch (error) {
-        console.error('PDF Render Error:', error);
-        container.innerHTML = `
-            <div class="pdf-preview">
-                <i class="fas fa-file-pdf"></i>
-                <span>Preview Unavailable</span>
-            </div>`;
-    }
+      page.render({
+        canvasContext: ctx,
+        viewport: viewport
+      });
+    });
+  }).catch(err => console.error('PDF preview error:', err));
 }

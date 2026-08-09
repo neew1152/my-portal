@@ -1,77 +1,36 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nopphakon Boonsong | Portfolio</title>
-    <link rel="stylesheet" href="style.css">
-    <link
-        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Roboto+Mono:wght@300;400&display=swap"
-        rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
-    <script>
-        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
-    </script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Portfolio & Certifications</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+  <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
 
-    <!-- Background Layers -->
-    <canvas id="fluid-canvas"></canvas>
-    <div class="bg-grid"></div>
+  <div class="container">
+    <header class="profile-card">
+      <img src="assets/profile.png" alt="Profile Picture" class="avatar" onerror="this.src='https://via.placeholder.com/120'">
+      <div class="profile-info">
+        <h1>Nopphakon Boonsong</h1>
+        <ul class="contact-list">
+          <li><strong>Email:</strong> <a href="mailto:neew2166@gmail.com">neew2166@gmail.com</a></li>
+          <li><strong>Phone:</strong> <a href="tel:+66832261858">+66 83 226 1858</a></li>
+          <li><strong>GitHub:</strong> <a href="https://github.com/neew1152" target="_blank">neew1152</a></li>
+        </ul>
+      </div>
+    </header>
 
+    <!-- Certificate Section -->
     <main>
-        <!-- Hero Section -->
-        <section id="about" class="hero-section">
-            <div class="glass-panel gnome-style">
-
-                <div class="hero-left">
-                    <!-- The "Frame" around the profile -->
-                    <div class="profile-frame">
-                        <div class="glow-ring">
-                            <img src="assets/profile.png" alt="Nopphakon Boonsong" class="profile-pic"
-                                onerror="this.style.display='none'; this.parentElement.innerHTML='<i class=\'fas fa-user-astronaut fa-5x\'></i>'">
-                        </div>
-                    </div>
-                </div>
-
-                <div class="hero-right">
-                    <h1>Nopphakon <span class="accent-text">Boonsong</span></h1>
-                    <p class="subtitle">System Certification Portfolio</p>
-
-                    <div class="contact-info">
-                        <a href="mailto:neew2166@gmail.com" class="info-item">
-                            <i class="fas fa-envelope"></i> neew2166@gmail.com
-                        </a>
-                        <a href="tel:+66832281858" class="info-item">
-                            <i class="fas fa-phone"></i> +66 83-228-1858
-                        </a>
-                        <a href="https://github.com/neew1152" target="_blank" class="info-item">
-                            <i class="fab fa-github"></i> neew1152
-                        </a>
-                    </div>
-                </div>
-
-            </div>
-        </section>
-
-        <section id="certs" class="cert-section">
-            <h2 class="section-title">Verified <span class="accent-text">Certificates</span></h2>
-            <p class="instruction">Loading data from repository...</p>
-            <div class="cert-grid" id="cert-grid"></div>
-        </section>
-        
-        <!-- Upload Section Removed -->
+      <h2>Certificates & Documents</h2>
+      <div id="preview-grid" class="grid">
+        <!-- Rendered dynamically by script.js -->
+      </div>
     </main>
+  </div>
 
-    <footer class="glass-footer">
-        <p>&copy; 2025 neew1152. All rights reserved.</p>
-    </footer>
-
-    <script src="script.js"></script>
-    <script src="background-fx.js"></script>
+  <script src="script.js"></script>
 </body>
-
 </html>
