@@ -1,46 +1,64 @@
-[
-  {
-    "filename": "DLA_Delivery-Robot_2026.pdf",
-    "description": "Silver Medal | Grades 7-9"
-  },
-  {
-  "filename": "EF-SET_2026.pdf",
-  "description": "47/100 B1 Intermediate"
-  },
-  {
-  "filename": "NAT_ENG-Provincial_2025.pdf",
-  "description": "Honorable Mention | Lower Secondary Level"
-  },
-  {
-  "filename": "NCSA_Basic-Cybersecurity_2025.pdf",
-  "description": "Completion"
-  },
-  {
-  "filename": "THNCA_5980121526NB_2025.pdf",
-  "description": "Participants"
-  },
-  {
-  "filename": "OBEC_Rescue-Robot_2025.pdf",
-  "description": "Gold Medal | Grades 7-9"
-  },
-  {
-  "filename": "TPA_Robo-Soccer_2025.pdf",
-  "description": "Participants"
-  },
-  {
-  "filename": "Samsung_Introduction-to-Programming-with-Python_2024.png",
-  "description": "Completion"
-  },
-  {
-  "filename": "Samsung_Introduction-to-Artificial-Intelligence-in-the-Workplace_2024.png",
-  "description": "Completion"
-  },
-  {
-  "filename": "NAT_ENG-Provincial_2024.pdf",
-  "description": "Bronze Medal | Lower Secondary Level"
-  },
-  {
-  "filename": "EF-SET_2024.pdf",
-  "description": "43/100 B1 Intermediate"
-  }
-]
+{
+  "certs": [
+    {
+      "filename": "DLA_Delivery-Robot_2026.pdf",
+      "description": "Silver Medal | Grades 7-9",
+      "recommended": true
+    },
+    {
+      "filename": "EF-SET_2026.pdf",
+      "description": "47/100 B1 Intermediate",
+      "recommended": true
+    },
+    {
+      "filename": "NAT_ENG-Provincial_2025.pdf",
+      "description": "Honorable Mention | Lower Secondary Level",
+      "recommended": false
+    },
+    {
+      "filename": "NCSA_Basic-Cybersecurity_2025.pdf",
+      "description": "Completion",
+      "recommended": false
+    },
+    {
+      "filename": "THNCA_5980121526NB_2025.pdf",
+      "description": "Participants",
+      "recommended": true
+    },
+    {
+      "filename": "OBEC_Rescue-Robot_2025.pdf",
+      "description": "Gold Medal | Grades 7-9",
+      "recommended": true
+    },
+    {
+      "filename": "TPA_Robo-Soccer_2025.pdf",
+      "description": "Participants",
+      "recommended": false
+    },
+    {
+      "filename": "Samsung_Introduction-to-Programming-with-Python_2024.png",
+      "description": "Completion",
+      "recommended": false
+    },
+    {
+      "filename": "Samsung_Introduction-to-Artificial-Intelligence-in-the-Workplace_2024.png",
+      "description": "Completion",
+      "recommended": false
+    },
+    {
+      "filename": "NAT_ENG-Provincial_2024.pdf",
+      "description": "Bronze Medal | Lower Secondary Level",
+      "recommended": true
+    },
+    {
+      "filename": "EF-SET_2024.pdf",
+      "description": "43/100 B1 Intermediate",
+      "recommended": false
+    }
+  ],
+    "recommended_repos": [
+    "Project-Isla",
+    "VAVR-Robot-SE",
+    "Python_YouTube_Downloader_Project"
+  ]
+}

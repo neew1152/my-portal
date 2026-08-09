@@ -1,5 +1,5 @@
 :root {
-  /* Color Palette - Softer, modern Slate tones for eye comfort */
+  /* Slate Theme Color Palette */
   --bg-color: #f8fafc;
   --card-bg: #ffffff;
   --text-main: #1e293b;
@@ -9,20 +9,24 @@
   --primary-light: #eff6ff;
   --border-color: #e2e8f0;
   
+  /* Category Colors */
+  --badge-security: #ef4444;
+  --badge-android: #10b981;
+  --badge-guides: #f59e0b;
+  --badge-tools: #8b5cf6;
+
   /* Layout & Geometry */
   --border-radius: 16px;
   --card-radius: 12px;
   
-  /* Layered Ambient Shadows for soft depth */
+  /* Layered Ambient Shadows */
   --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02);
   --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.04), 0 2px 4px -2px rgba(0, 0, 0, 0.02);
   --shadow-lg: 0 12px 24px -4px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.03);
   
-  /* Smooth Easing */
   --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Automatic Dark Mode for night comfort */
 @media (prefers-color-scheme: dark) {
   :root {
     --bg-color: #0f172a;
@@ -49,31 +53,29 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* Full wide-screen layout */
 .container {
   width: 100%;
+  max-width: 1320px;
+  margin: 0 auto;
   box-sizing: border-box;
 }
 
-/* Profile Card Header */
+/* Profile Card */
 .profile-card {
   background: var(--card-bg);
-  padding: 36px;
+  padding: 32px;
   border-radius: var(--border-radius);
   border: 1px solid var(--border-color);
   display: flex;
   align-items: center;
-  gap: 32px;
+  gap: 28px;
   box-shadow: var(--shadow-md);
-  margin-bottom: 32px;
-  width: 100%;
-  box-sizing: border-box;
-  transition: var(--transition);
+  margin-bottom: 24px;
 }
 
 .avatar {
-  width: 110px;
-  height: 110px;
+  width: 105px;
+  height: 105px;
   border-radius: 50%;
   object-fit: cover;
   border: 3px solid var(--card-bg);
@@ -82,40 +84,36 @@ body {
 }
 
 .profile-info h1 {
-  margin: 0 0 6px 0;
+  margin: 0 0 4px 0;
   font-size: 1.85rem;
   font-weight: 700;
   letter-spacing: -0.02em;
 }
 
 .bio {
-  margin: 0 0 16px 0;
+  margin: 0 0 12px 0;
   color: var(--text-muted);
-  font-size: 1.05rem;
-  line-height: 1.5;
+  font-size: 0.98rem;
 }
 
 .contact-list {
   list-style: none;
   padding: 0;
   margin: 0;
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 8px;
 }
 
-/* Styled contact links into soft pill badges */
 .contact-list a {
   color: var(--primary-color);
   background-color: var(--primary-light);
-  padding: 6px 14px;
+  padding: 5px 12px;
   border-radius: 20px;
   text-decoration: none;
   font-weight: 500;
   transition: var(--transition);
-  display: inline-flex;
-  align-items: center;
 }
 
 .contact-list a:hover {
@@ -123,14 +121,72 @@ body {
   background-color: var(--primary-color);
 }
 
-/* Wide-screen flexible responsive grid */
-.grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); 
-  gap: 24px;
-  width: 100%;
+/* Tab Navigation */
+.tab-nav {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 16px;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 12px;
 }
 
+.tab-btn {
+  background: transparent;
+  border: 1px solid transparent;
+  padding: 10px 20px;
+  border-radius: 24px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.tab-btn:hover {
+  color: var(--text-main);
+  background-color: var(--primary-light);
+}
+
+.tab-btn.active {
+  background-color: var(--primary-color);
+  color: #ffffff;
+  box-shadow: var(--shadow-sm);
+}
+
+/* Filter Controls */
+.filter-bar {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.pill-btn {
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  padding: 6px 14px;
+  border-radius: 18px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.pill-btn:hover, .pill-btn.active {
+  border-color: var(--primary-color);
+  color: var(--primary-color);
+  background-color: var(--primary-light);
+}
+
+/* Responsive Grid */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); 
+  gap: 24px;
+}
+
+/* Card Styling */
 .card {
   background: var(--card-bg);
   border-radius: var(--card-radius);
@@ -142,28 +198,25 @@ body {
   transition: var(--transition);
   text-decoration: none;
   color: inherit;
-  cursor: pointer;
+  position: relative;
 }
 
 .card:hover {
-  transform: translateY(-5px);
+  transform: translateY(-4px);
   box-shadow: var(--shadow-lg);
-  border-color: transparent;
-}
-
-.card:hover .card-title {
-  color: var(--primary-color);
+  border-color: var(--primary-color);
 }
 
 .card-preview {
   width: 100%;
-  aspect-ratio: 1.414 / 1;
-  background-color: rgba(0, 0, 0, 0.02);
+  aspect-ratio: 1.77 / 1;
+  background-color: rgba(0, 0, 0, 0.03);
   display: flex;
   align-items: center;
   justify-content: center;
   overflow: hidden;
   border-bottom: 1px solid var(--border-color);
+  position: relative;
 }
 
 .card-preview img,
@@ -176,13 +229,24 @@ body {
 
 .card:hover .card-preview img,
 .card:hover .card-preview canvas {
-  transform: scale(1.03);
+  transform: scale(1.04);
 }
 
-.file-icon {
-  font-size: 2.2rem;
-  font-weight: 600;
+.card-preview-fallback {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   color: var(--text-muted);
+  font-size: 2rem;
+  gap: 6px;
+}
+
+.card-preview-fallback span {
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 .card-body {
@@ -192,38 +256,69 @@ body {
   flex-grow: 1;
 }
 
+.card-header-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
 .card-title {
-  margin: 0 0 8px 0;
-  font-size: 1.15rem;
+  margin: 0;
+  font-size: 1.1rem;
   font-weight: 600;
-  text-transform: capitalize;
   letter-spacing: -0.01em;
-  transition: color 0.2s ease;
+  word-break: break-word;
 }
 
 .card-desc {
-  font-size: 0.925rem;
+  font-size: 0.9rem;
   color: var(--text-muted);
-  margin: 0;
+  margin: 0 0 16px 0;
   line-height: 1.5;
   flex-grow: 1;
 }
 
-/* Mobile Responsiveness */
-@media (max-width: 600px) {
-  body {
-    padding: 16px;
-  }
-  
-  .profile-card {
-    padding: 24px;
-    flex-direction: column;
-    text-align: center;
-    gap: 20px;
-  }
+.card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  border-top: 1px dashed var(--border-color);
+  padding-top: 12px;
+  margin-top: auto;
+}
 
-  .contact-list {
-    justify-content: center;
-    gap: 8px;
-  }
+/* Badge Tags */
+.badge {
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+.badge-security { background-color: rgba(239, 68, 68, 0.15); color: var(--badge-security); }
+.badge-android  { background-color: rgba(16, 185, 129, 0.15); color: var(--badge-android); }
+.badge-guides   { background-color: rgba(245, 158, 11, 0.15); color: var(--badge-guides); }
+.badge-tools    { background-color: rgba(139, 92, 246, 0.15); color: var(--badge-tools); }
+.badge-recommend { background-color: rgba(59, 130, 246, 0.15); color: var(--primary-color); }
+
+.loading-state {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 60px;
+  color: var(--text-muted);
+  font-size: 1.1rem;
+}
+
+@media (max-width: 600px) {
+  body { padding: 16px; }
+  .profile-card { flex-direction: column; text-align: center; gap: 16px; }
+  .contact-list { justify-content: center; }
+  .tab-nav { overflow-x: auto; padding-bottom: 8px; }
 }
