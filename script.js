@@ -14,7 +14,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
       data.forEach((item, index) => {
         const filePath = `assets/certs/${item.filename}`;
-        const title = item.filename.substring(0, item.filename.lastIndexOf('.')) || item.filename;
+        
+        // Remove file extension and replace '-' and '_' with spaces
+        const rawTitle = item.filename.substring(0, item.filename.lastIndexOf('.')) || item.filename;
+        const title = rawTitle.replace(/[-_]/g, ' ');
+
         const extension = item.filename.split('.').pop().toLowerCase();
 
         const card = document.createElement('a');
