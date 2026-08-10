@@ -38,24 +38,18 @@ function setupTabs() {
 
 async function loadData() {
   const grid = document.getElementById("grid-container");
-  grid.innerHTML = `<div class="loading-state">Loading portal dynamic data...</div>`;
+  grid.innerHTML = `<div class="loading-state">Loading portal data...</div>`;
 
   try {
-    const [reposResponse, certsResponse, gistsResponse] =
-      await Promise.allSettled([
-        fetch(
-          `https://api.github.com/users/${GITHUB_USERNAME}/repos?sort=updated&per_page=100`
-        ),
-        fetch("data.json"),
-        fetch(
-          `https://api.github.com/users/${GITHUB_USERNAME}/gists?per_page=100`
-        ),
-      ]);
+    const [reposResponse, certsResponse, gistsResponse] = await Promise.allSettled([
+      fetch(`https://api.github.com/users/${GITHUB_USERNAME}/repos?sort=updated&per_page=100`),
+      fetch("data.json"),
+      fetch(`https://api.github.com/users/${GITHUB_USERNAME}/gists?per_page=100`),
+    ]);
 
     if (reposResponse.status === "fulfilled" && reposResponse.value.ok) {
       const rawRepos = await reposResponse.value.json();
       reposData = rawRepos.filter((repo) => !repo.fork);
-      fetchRepoReadmeImages();
     }
 
     if (certsResponse.status === "fulfilled" && certsResponse.value.ok) {
@@ -84,14 +78,18 @@ async function loadData() {
 
     renderFilterBar();
     renderContent();
+
+    loadRepoReadmeImagesInBackground();
+    loadCertPreviewsInBackground();
+
   } catch (err) {
     console.error("Error loading portal data:", err);
-    grid.innerHTML = `<div class="loading-state" style="color:red;">Error loading data. Make sure you are using a web server.</div>`;
+    grid.innerHTML = `<div class="loading-state" style="color:red;">Error loading portal data. Make sure you are using a web server.</div>`;
   }
 }
 
-async function fetchRepoReadmeImages() {
-  for (const repo of reposData) {
+function loadRepoReadmeImagesInBackground() {
+  reposData.forEach(async (repo) => {
     try {
       const readmeRes = await fetch(
         `https://raw.githubusercontent.com/${repo.full_name}/${repo.default_branch}/README.md`
@@ -105,12 +103,64 @@ async function fetchRepoReadmeImages() {
         );
         if (imageUrl) {
           repo.preview_image = imageUrl;
-          if (currentTab === "repos") renderContent();
+          updateCardPreviewDOM(`repo-${repo.id}`, imageUrl, repo.name);
         }
       }
     } catch (e) {
     }
+  });
+}
+
+function loadCertPreviewsInBackground() {
+  certsData.forEach(async (item) => {
+    const filePath = `assets/certs/${item.filename}`;
+    const extension = item.filename.split(".").pop().toLowerCase();
+    const safeId = `cert-${sanitizeId(item.filename)}`;
+
+    if (["png", "jpg", "jpeg", "webp", "gif"].includes(extension)) {
+      item.preview_image = filePath;
+      updateCardPreviewDOM(safeId, filePath, item.filename);
+    } else if (extension === "pdf" && !item.preview_image) {
+      try {
+        const pdfDataUrl = await renderPdfToDataUrl(filePath);
+        item.preview_image = pdfDataUrl;
+        updateCardPreviewDOM(safeId, pdfDataUrl, item.filename);
+      } catch (e) {
+        console.error(`Error rendering background PDF preview for ${item.filename}:`, e);
+      }
+    }
+  });
+}
+
+function sanitizeId(str) {
+  return str.replace(/[^a-zA-Z0-9_-]/g, "_");
+}
+
+function updateCardPreviewDOM(cardDataId, src, altText) {
+  const card = document.querySelector(`[data-card-id="${cardDataId}"]`);
+  if (!card) return;
+
+  const previewContainer = card.querySelector(".card-preview");
+  if (previewContainer) {
+    previewContainer.innerHTML = `<img src="${src}" alt="${altText}" loading="lazy">`;
   }
+}
+
+function renderPdfToDataUrl(url) {
+  return pdfjsLib
+    .getDocument(url)
+    .promise.then((pdf) => pdf.getPage(1))
+    .then((page) => {
+      const canvas = document.createElement("canvas");
+      const ctx = canvas.getContext("2d");
+      const viewport = page.getViewport({ scale: 1.5 });
+      canvas.height = viewport.height;
+      canvas.width = viewport.width;
+
+      return page.render({ canvasContext: ctx, viewport: viewport }).promise.then(() => {
+        return canvas.toDataURL("image/png");
+      });
+    });
 }
 
 function extractFirstImageUrl(markdown, repoFullName, defaultBranch) {
@@ -248,6 +298,7 @@ function renderRepos(grid) {
     card.href = repo.html_url;
     card.target = "_blank";
     card.className = "card";
+    card.setAttribute("data-card-id", `repo-${repo.id}`);
 
     const cleanTitle = repo.name.replace(/[-_]/g, " ");
 
@@ -292,26 +343,25 @@ function renderCertificates(grid) {
     return;
   }
 
-  filtered.forEach((item, index) => {
+  filtered.forEach((item) => {
     const filePath = `assets/certs/${item.filename}`;
     const rawTitle =
       item.filename.substring(0, item.filename.lastIndexOf(".")) ||
       item.filename;
     const title = rawTitle.replace(/[-_]/g, " ");
     const extension = item.filename.split(".").pop().toLowerCase();
+    const safeId = `cert-${sanitizeId(item.filename)}`;
 
     const card = document.createElement("a");
     card.href = filePath;
     card.target = "_blank";
     card.className = "card";
+    card.setAttribute("data-card-id", safeId);
 
-    const canvasId = `pdf-canvas-${index}`;
     let previewMedia = "";
 
-    if (["png", "jpg", "jpeg", "webp", "gif"].includes(extension)) {
-      previewMedia = `<img src="${filePath}" alt="${title}">`;
-    } else if (extension === "pdf") {
-      previewMedia = `<canvas id="${canvasId}"></canvas>`;
+    if (item.preview_image) {
+      previewMedia = `<img src="${item.preview_image}" alt="${title}" loading="lazy">`;
     } else {
       previewMedia = `<div class="card-preview-fallback">📄 <span>${extension.toUpperCase()}</span></div>`;
     }
@@ -331,29 +381,7 @@ function renderCertificates(grid) {
     `;
 
     grid.appendChild(card);
-
-    if (extension === "pdf") {
-      renderPdfToCanvas(filePath, canvasId);
-    }
   });
-}
-
-function renderPdfToCanvas(url, canvasId) {
-  pdfjsLib
-    .getDocument(url)
-    .promise.then((pdf) => {
-      pdf.getPage(1).then((page) => {
-        const canvas = document.getElementById(canvasId);
-        if (!canvas) return;
-        const ctx = canvas.getContext("2d");
-        const viewport = page.getViewport({ scale: 1.5 });
-        canvas.height = viewport.height;
-        canvas.width = viewport.width;
-
-        page.render({ canvasContext: ctx, viewport: viewport });
-      });
-    })
-    .catch((err) => console.error("PDF preview error:", err));
 }
 
 function renderGists(grid) {
@@ -373,6 +401,7 @@ function renderGists(grid) {
     card.href = gist.html_url;
     card.target = "_blank";
     card.className = "card";
+    card.setAttribute("data-card-id", `gist-${gist.id}`);
 
     const badgesHtml = gist.categories
       .map((cat) => {

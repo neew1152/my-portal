@@ -188,9 +188,16 @@ body {
   border-color: var(--border-hover);
 }
 
-.card-preview, 
-#grid-container canvas, 
-#grid-container img:not(.avatar) {
+.card-preview {
+  width: 100%;
+  height: 160px;
+  background-color: var(--primary-light);
+  overflow: hidden;
+  position: relative;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.card-preview img {
   width: 100% !important;
   height: 160px !important;
   max-height: 160px !important;
@@ -198,8 +205,27 @@ body {
   object-position: top;
   border-top-left-radius: var(--radius-card);
   border-top-right-radius: var(--radius-card);
-  border-bottom: 1px solid var(--border-color);
   display: block;
+  animation: fadeIn 0.35s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.card-preview-fallback {
+  width: 100%;
+  height: 160px;
+  background-color: var(--primary-light);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: var(--text-muted);
+  font-weight: 600;
+  font-size: 0.9rem;
 }
 
 .card-body, #grid-container > div > div:not(.card-preview) {
@@ -210,6 +236,13 @@ body {
   flex-grow: 1;
   min-width: 0;
   overflow: hidden;
+}
+
+.card-header-row {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
 }
 
 .card-title, 
@@ -250,7 +283,7 @@ body {
   text-transform: uppercase;
   letter-spacing: 0.04em;
   margin-right: 6px;
-  margin-bottom: 6px;
+  margin-bottom: 2px;
   background-color: var(--primary-light);
   color: var(--primary);
   width: fit-content;
@@ -270,6 +303,8 @@ body {
   background: none !important;
   border: none !important;
   box-shadow: none !important;
+  font-size: 1.05rem;
+  font-weight: 500;
 }
 
 @media (max-width: 600px) {
