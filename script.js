@@ -4,7 +4,7 @@ pdfjsLib.GlobalWorkerOptions.workerSrc =
 
 const GITHUB_USERNAME = "neew1152";
 
-// State Management
+// State Management: Default tab set to "repos"
 let currentTab = "repos";
 let currentFilter = "all";
 
@@ -21,6 +21,13 @@ document.addEventListener("DOMContentLoaded", () => {
 function setupTabs() {
   const tabs = document.querySelectorAll(".tab-btn");
   tabs.forEach((tab) => {
+    // Ensure UI active state matches initial currentTab state ("repos")
+    if (tab.dataset.tab === currentTab) {
+      tab.classList.add("active");
+    } else {
+      tab.classList.remove("active");
+    }
+
     tab.addEventListener("click", () => {
       tabs.forEach((t) => t.classList.remove("active"));
       tab.classList.add("active");
