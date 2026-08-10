@@ -195,6 +195,9 @@ body {
   overflow: hidden;
   position: relative;
   border-bottom: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .card-preview img {
@@ -202,11 +205,11 @@ body {
   height: 160px !important;
   max-height: 160px !important;
   object-fit: cover !important;
-  object-position: top;
+  object-position: center !important;
   border-top-left-radius: var(--radius-card);
   border-top-right-radius: var(--radius-card);
   display: block;
-  animation: fadeIn 0.35s ease-in-out;
+  animation: fadeIn 0.25s ease-in-out;
 }
 
 @keyframes fadeIn {
