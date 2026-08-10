@@ -1,36 +1,30 @@
 :root {
-  /* Background Image Asset */
   --bg-image: url("https://www.deepseek.com/_next/static/media/banner-background.a5704874.webp");
   --card-bg: #ffffff;
-  
-  /* DeepSeek Primary Colors */
-  --primary: #1e66f5;
-  --primary-hover: #1551c9;
+
+  --primary: #3b82f6;
+  --primary-hover: #4d6bfe;
   --primary-light: #eff5ff;
   
-  /* Text Colors */
   --text-main: #0f172a;
-  --text-title: rgb(71, 85, 105); /* Updated Title Color */
+  --text-title: rgb(71, 85, 105);
   --text-muted: #64748b;
   --text-dim: #94a3b8;
   
   --border-color: #dbeafe;
-  --border-hover: #1e66f5;
+  --border-hover: #4d6bfe;
 
-  /* Badges */
   --badge-security: #ef4444;
   --badge-android: #10b981;
   --badge-guides: #f59e0b;
   --badge-tools: #8b5cf6;
 
-  /* Radius & Shadows */
   --radius-lg: 20px;
   --radius-card: 16px;
   --shadow-card: 0 4px 20px rgba(30, 102, 245, 0.08), 0 1px 3px rgba(0, 0, 0, 0.03);
   --shadow-hover: 0 12px 30px rgba(30, 102, 245, 0.16);
 }
 
-/* Page Background using Official DeepSeek Banner Asset */
 body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   background-color: #f0f5ff;
@@ -51,7 +45,6 @@ body {
   margin: 0 auto;
 }
 
-/* --- PROFILE HEADER CARD --- */
 .profile-card, header.profile-card {
   background: #ffffff !important;
   padding: 32px;
@@ -108,7 +101,6 @@ body {
   color: #ffffff;
 }
 
-/* --- NAVIGATION TABS --- */
 .tab-nav {
   display: flex;
   gap: 10px;
@@ -142,7 +134,6 @@ body {
   box-shadow: 0 4px 12px rgba(30, 102, 245, 0.3);
 }
 
-/* --- FILTER PILLS --- */
 .filter-bar, #filter-bar {
   display: flex;
   gap: 8px;
@@ -168,7 +159,6 @@ body {
   background-color: var(--primary-light);
 }
 
-/* --- GRID LAYOUT --- */
 .grid, #grid-container {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -176,7 +166,6 @@ body {
   align-items: start;
 }
 
-/* --- CARDS CONTAINER --- */
 .card, #grid-container > div:not(.loading-state) {
   background: #ffffff !important;
   border-radius: var(--radius-card);
@@ -198,7 +187,6 @@ body {
   border-color: var(--border-hover);
 }
 
-/* --- PREVIEW MEDIA --- */
 .card-preview, 
 #grid-container canvas, 
 #grid-container img:not(.avatar) {
@@ -213,7 +201,6 @@ body {
   display: block;
 }
 
-/* --- CARD CONTENT & TYPOGRAPHY --- */
 .card-body, #grid-container > div > div:not(.card-preview) {
   padding: 20px;
   display: flex;
@@ -224,7 +211,6 @@ body {
   overflow: hidden;
 }
 
-/* Title Color Set to rgb(71, 85, 105) */
 .card-title, 
 #grid-container h2, 
 #grid-container h3, 
@@ -254,7 +240,6 @@ body {
   line-height: 1.5;
 }
 
-/* --- BADGES --- */
 .badge, #grid-container span.badge, #grid-container .badge {
   display: inline-block;
   font-size: 0.72rem;
@@ -285,7 +270,6 @@ body {
   box-shadow: none !important;
 }
 
-/* Responsive */
 @media (max-width: 600px) {
   body { padding: 16px; }
   .profile-card, header.profile-card { flex-direction: column; text-align: center; gap: 16px; padding: 24px; }

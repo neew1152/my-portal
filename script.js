@@ -249,7 +249,6 @@ function renderRepos(grid) {
     card.target = "_blank";
     card.className = "card";
 
-    // Format repo title: replace '-' and '_' with spaces
     const cleanTitle = repo.name.replace(/[-_]/g, " ");
 
     const previewMedia = repo.preview_image
