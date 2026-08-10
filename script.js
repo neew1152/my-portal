@@ -1,10 +1,8 @@
-// Configure PDF.js Worker
 pdfjsLib.GlobalWorkerOptions.workerSrc =
   "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js";
 
 const GITHUB_USERNAME = "neew1152";
 
-// State Management: Default tab set to "repos"
 let currentTab = "repos";
 let currentFilter = "all";
 
@@ -21,7 +19,6 @@ document.addEventListener("DOMContentLoaded", () => {
 function setupTabs() {
   const tabs = document.querySelectorAll(".tab-btn");
   tabs.forEach((tab) => {
-    // Ensure UI active state matches initial currentTab state ("repos")
     if (tab.dataset.tab === currentTab) {
       tab.classList.add("active");
     } else {
@@ -39,7 +36,6 @@ function setupTabs() {
   });
 }
 
-// Fetch all data sources concurrently
 async function loadData() {
   const grid = document.getElementById("grid-container");
   grid.innerHTML = `<div class="loading-state">Loading portal dynamic data...</div>`;
@@ -81,7 +77,7 @@ async function loadData() {
           filename: firstFile,
           description: gist.description || "",
           html_url: gist.html_url,
-          categories: categorizeGist(firstFile, gist.description), // Array of categories
+          categories: categorizeGist(firstFile, gist.description),
         };
       });
     }
@@ -94,7 +90,6 @@ async function loadData() {
   }
 }
 
-// Extract first image from README.md for each repo
 async function fetchRepoReadmeImages() {
   for (const repo of reposData) {
     try {
@@ -114,12 +109,10 @@ async function fetchRepoReadmeImages() {
         }
       }
     } catch (e) {
-      // Ignore README fetch errors gracefully
     }
   }
 }
 
-// Regex image parser for Markdown
 function extractFirstImageUrl(markdown, repoFullName, defaultBranch) {
   if (!markdown) return null;
   const mdMatch = markdown.match(/!\[.*?\]\((.*?)\)/);
@@ -142,10 +135,6 @@ function extractFirstImageUrl(markdown, repoFullName, defaultBranch) {
   return `https://raw.githubusercontent.com/${repoFullName}/${defaultBranch}/${cleanPath}`;
 }
 
-/**
- * Categorize Gists into multiple tags (Android, Security, Tools, Guides).
- * Returns an array of category strings.
- */
 function categorizeGist(filename, description = "") {
   const fn = filename.toLowerCase();
   const desc = (description || "").toLowerCase();
@@ -187,7 +176,6 @@ function categorizeGist(filename, description = "") {
     categories.push("Guides");
   }
 
-  // Fallback category if no conditions matched
   if (categories.length === 0) {
     categories.push("Guides");
   }
@@ -195,7 +183,6 @@ function categorizeGist(filename, description = "") {
   return categories;
 }
 
-// Render dynamic sub-filter category buttons for Gists
 function renderFilterBar() {
   const filterBar = document.getElementById("filter-bar");
   let filters = [];
@@ -228,13 +215,11 @@ function renderFilterBar() {
 }
 
 function setFilter(filterId) {
-  // Toggle filter off if clicked again
   currentFilter = currentFilter === filterId ? "all" : filterId;
   renderFilterBar();
   renderContent();
 }
 
-// Main Render Dispatcher
 function renderContent() {
   const grid = document.getElementById("grid-container");
   grid.innerHTML = "";
@@ -248,7 +233,6 @@ function renderContent() {
   }
 }
 
-// 1. Render Repositories
 function renderRepos(grid) {
   let filtered = [...reposData];
   const isRepoRecommended = (r) =>
@@ -265,9 +249,20 @@ function renderRepos(grid) {
     card.target = "_blank";
     card.className = "card";
 
+    // Format repo title: replace '-' and '_' with spaces
+    const cleanTitle = repo.name.replace(/[-_]/g, " ");
+
     const previewMedia = repo.preview_image
-      ? `<img src="${repo.preview_image}" alt="${repo.name}" loading="lazy">`
-      : `<div class="card-preview-fallback">💻 <span>Code</span></div>`;
+      ? `<img src="${repo.preview_image}" alt="${cleanTitle}" loading="lazy">`
+      : `<div class="card-preview-fallback git-fallback">
+      <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="6" y1="3" x2="6" y2="15"></line>
+        <circle cx="18" cy="6" r="3"></circle>
+        <circle cx="6" cy="18" r="3"></circle>
+        <path d="M18 9a9 9 0 0 1-9 9"></path>
+      </svg>
+      <span>Repository</span>
+    </div>`;
 
     const isRecommended = isRepoRecommended(repo);
     const badgeHtml = isRecommended ? `<span class="badge badge-recommend">⭐ Recommended</span>` : "";
@@ -276,7 +271,7 @@ function renderRepos(grid) {
       <div class="card-preview">${previewMedia}</div>
       <div class="card-body">
         <div class="card-header-row">
-          <h3 class="card-title">${repo.name}</h3>
+          <h3 class="card-title">${cleanTitle}</h3>
           ${badgeHtml}
         </div>
         <p class="card-desc">${repo.description || "No description provided."}</p>
@@ -287,7 +282,6 @@ function renderRepos(grid) {
   });
 }
 
-// 2. Render Certificates
 function renderCertificates(grid) {
   let filtered = [...certsData];
   const isCertRecommended = (c) => c.recommended || c.isRecommended;
@@ -345,7 +339,6 @@ function renderCertificates(grid) {
   });
 }
 
-// Render PDF Page 1 onto Canvas
 function renderPdfToCanvas(url, canvasId) {
   pdfjsLib
     .getDocument(url)
@@ -364,11 +357,9 @@ function renderPdfToCanvas(url, canvasId) {
     .catch((err) => console.error("PDF preview error:", err));
 }
 
-// 3. Render GitHub Gists (Supports Multiple Tags)
 function renderGists(grid) {
   let filtered = gistsData;
 
-  // Filter if gist's categories array contains active filter
   if (currentFilter !== "all") {
     filtered = gistsData.filter((g) => g.categories.includes(currentFilter));
   }
@@ -384,7 +375,6 @@ function renderGists(grid) {
     card.target = "_blank";
     card.className = "card";
 
-    // Generate badge HTML for each tag in gist.categories
     const badgesHtml = gist.categories
       .map((cat) => {
         const categoryClass = `badge-${cat.toLowerCase()}`;

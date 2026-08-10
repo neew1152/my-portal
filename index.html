@@ -10,7 +10,6 @@
 <body>
 
   <div class="container">
-    <!-- Header Profile Card -->
     <header class="profile-card">
       <img src="assets/profile.png" alt="Profile Picture" class="avatar" onerror="this.src='https://via.placeholder.com/120'">
       <div class="profile-info">
@@ -23,17 +22,14 @@
       </div>
     </header>
 
-    <!-- Main Section Tabs (Order: Cert -> Gist -> Repo) -->
     <nav class="tab-nav">
       <button class="tab-btn" data-tab="certs">📜 Certificates</button>
       <button class="tab-btn" data-tab="gists">📝 Gists</button>
       <button class="tab-btn active" data-tab="repos">💻 Repositories</button>
     </nav>
 
-    <!-- Dynamic Sub-Filter Controls -->
     <div id="filter-bar" class="filter-bar"></div>
 
-    <!-- Main Cards Grid -->
     <main>
       <div id="grid-container" class="grid">
         <div class="loading-state">Loading portal data...</div>
