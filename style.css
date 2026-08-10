@@ -7,7 +7,7 @@
   --primary-light: #eff5ff;
   
   --text-main: #0f172a;
-  --text-title: rgb(71, 85, 105);
+  --text-title: #475569;
   --text-muted: #64748b;
   --text-dim: #94a3b8;
   
@@ -18,6 +18,7 @@
   --badge-android: #10b981;
   --badge-guides: #f59e0b;
   --badge-tools: #8b5cf6;
+  --badge-recommend: #3b82f6;
 
   --radius-lg: 20px;
   --radius-card: 16px;
@@ -240,7 +241,7 @@ body {
   line-height: 1.5;
 }
 
-.badge, #grid-container span.badge, #grid-container .badge {
+.badge {
   display: inline-block;
   font-size: 0.72rem;
   font-weight: 700;
@@ -255,10 +256,11 @@ body {
   width: fit-content;
 }
 
-.badge-security { background-color: rgba(239, 68, 68, 0.12); color: var(--badge-security); }
-.badge-android  { background-color: rgba(16, 185, 129, 0.12); color: var(--badge-android); }
-.badge-guides   { background-color: rgba(245, 158, 11, 0.12); color: var(--badge-guides); }
-.badge-tools    { background-color: rgba(139, 92, 246, 0.12); color: var(--badge-tools); }
+.badge-security, #grid-container .badge-security { background-color: rgba(239, 68, 68, 0.12); color: var(--badge-security); }
+.badge-android, #grid-container .badge-android   { background-color: rgba(16, 185, 129, 0.12); color: var(--badge-android); }
+.badge-guides, #grid-container .badge-guides    { background-color: rgba(245, 158, 11, 0.12); color: var(--badge-guides); }
+.badge-tools, #grid-container .badge-tools     { background-color: rgba(139, 92, 246, 0.12); color: var(--badge-tools); }
+.badge-recommend, #grid-container .badge-recommend { background-color: rgba(219, 234, 254, 0.5); color: var(--badge-recommend); }
 
 .loading-state {
   grid-column: 1 / -1;
