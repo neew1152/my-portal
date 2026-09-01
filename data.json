@@ -1,7 +1,7 @@
 {
   "certs": [
     {
-      "filename": "DLA_Delivery-Robot_2026.pdf",
+      "filename": "DLA-Region_Delivery-Robot_2026.pdf",
       "description": "Silver Medal | Grades 7-9",
       "recommended": true
     },
@@ -11,7 +11,7 @@
       "recommended": true
     },
     {
-      "filename": "NAT_ENG-Provincial_2025.pdf",
+      "filename": "NAT-Provincial_English_2025.pdf",
       "description": "Honorable Mention | Lower Secondary Level",
       "recommended": false
     },
@@ -46,7 +46,7 @@
       "recommended": false
     },
     {
-      "filename": "NAT_ENG-Provincial_2024.pdf",
+      "filename": "NAT-Provincial_English_2024.pdf",
       "description": "Bronze Medal | Lower Secondary Level",
       "recommended": true
     },
