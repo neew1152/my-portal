@@ -2,17 +2,17 @@
   "certs": [
     {
       "filename": "OBEC_Intermediate-Robot_2026.pdf",
-      "description": "Gold Medal | Grades 7-9",
+      "description": "Gold Medal",
       "recommended": false
     },
     {
       "filename": "OBEC_Advanced-Robot_2026.pdf",
-      "description": "Gold Medal | Grades 7-9",
+      "description": "Gold Medal",
       "recommended": true
     },
     {
       "filename": "DLA-Region_Robot_2026.pdf",
-      "description": "Silver Medal | Grades 7-9",
+      "description": "Silver Medal",
       "recommended": false
     },
     {
@@ -22,7 +22,7 @@
     },
     {
       "filename": "NAT-Provincial_English_2025.pdf",
-      "description": "Honorable Mention | Lower Secondary Level",
+      "description": "Honorable Mention",
       "recommended": false
     },
     {
@@ -37,12 +37,12 @@
     },
     {
       "filename": "OBEC_Intermediate-Robot_2025.pdf",
-      "description": "Gold Medal | Grades 7-9",
+      "description": "Gold Medal",
       "recommended": true
     },
     {
       "filename": "DLA-Region_Robot_2025.pdf",
-      "description": "Bronze Medal | Grades 7-9",
+      "description": "Bronze Medal",
       "recommended": false
     },
     {
@@ -62,7 +62,7 @@
     },
     {
       "filename": "NAT-Provincial_English_2024.pdf",
-      "description": "Bronze Medal | Lower Secondary Level",
+      "description": "Bronze Medal",
       "recommended": false
     },
     {
