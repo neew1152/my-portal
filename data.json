@@ -1,7 +1,7 @@
 {
   "certs": [
     {
-      "filename": "DLA-Region_Delivery-Robot_2026.pdf",
+      "filename": "DLA-Region_Robot_2026.pdf",
       "description": "Silver Medal | Grades 7-9",
       "recommended": true
     },
@@ -23,15 +23,15 @@
     {
       "filename": "THNCA_Basic-Cybersecurity_2025.pdf",
       "description": "Participants",
-      "recommended": true
+      "recommended": false
     },
     {
-      "filename": "OBEC_Rescue-Robot_2025.pdf",
+      "filename": "OBEC_Intermediate-Robot_2025.pdf",
       "description": "Gold Medal | Grades 7-9",
       "recommended": true
     },
     {
-      "filename": "DLA-Region_Delivery-Robot_2025.pdf",
+      "filename": "DLA-Region-Robot_2025.pdf",
       "description": "Bronze Medal | Grades 7-9",
       "recommended": false
     },
@@ -53,7 +53,7 @@
     {
       "filename": "NAT-Provincial_English_2024.pdf",
       "description": "Bronze Medal | Lower Secondary Level",
-      "recommended": true
+      "recommended": false
     },
     {
       "filename": "EFSET_2024.pdf",
