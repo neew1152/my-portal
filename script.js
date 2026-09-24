@@ -373,7 +373,7 @@ function renderCertificates(grid) {
       <div class="card-preview">${previewMedia}</div>
       <div class="card-body">
         <div class="card-header-row">
-          <h3 class="card-title" style="text-transform: capitalize;">${title}</h3>
+          <h3 class="card-title">${title}</h3>
           ${badgeHtml}
         </div>
         <p class="card-desc">${item.description || ""}</p>
