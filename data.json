@@ -1,6 +1,16 @@
 {
   "certs": [
     {
+      "filename": "OBEC_Intermediate-Robot_2026.pdf",
+      "description": "Gold Medal | Grades 7-9",
+      "recommended": true
+    },
+    {
+      "filename": "OBEC_Advanced-Robot_2026.pdf",
+      "description": "Gold Medal | Grades 7-9",
+      "recommended": true
+    },
+    {
       "filename": "DLA-Region_Robot_2026.pdf",
       "description": "Silver Medal | Grades 7-9",
       "recommended": true
