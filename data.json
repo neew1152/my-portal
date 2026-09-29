@@ -1,0 +1,79 @@
+{
+  "certs": [
+    {
+      "filename": "OBEC_Intermediate-Robot_2026.pdf",
+      "description": "Gold Medal",
+      "recommended": false
+    },
+    {
+      "filename": "OBEC_Advanced-Robot_2026.pdf",
+      "description": "Gold Medal",
+      "recommended": true
+    },
+    {
+      "filename": "DLA-Region_Robot_2026.pdf",
+      "description": "Silver Medal",
+      "recommended": false
+    },
+    {
+      "filename": "EFSET_2026.pdf",
+      "description": "B1 Intermediate",
+      "recommended": false
+    },
+    {
+      "filename": "NAT-Provincial_English_2025.pdf",
+      "description": "Honorable Mention",
+      "recommended": false
+    },
+    {
+      "filename": "NCSA_Basic-Cybersecurity_2025.pdf",
+      "description": "Completion",
+      "recommended": false
+    },
+    {
+      "filename": "THNCA_Basic-Cybersecurity_2025.pdf",
+      "description": "Participants",
+      "recommended": false
+    },
+    {
+      "filename": "OBEC_Intermediate-Robot_2025.pdf",
+      "description": "Gold Medal",
+      "recommended": true
+    },
+    {
+      "filename": "DLA-Region_Robot_2025.pdf",
+      "description": "Bronze Medal",
+      "recommended": false
+    },
+    {
+      "filename": "TPA_Robo-Soccer_2025.pdf",
+      "description": "Participants",
+      "recommended": false
+    },
+    {
+      "filename": "Samsung_Introduction-to-Programming-with-Python_2024.png",
+      "description": "Completion",
+      "recommended": false
+    },
+    {
+      "filename": "Samsung_Introduction-to-Artificial-Intelligence-in-the-Workplace_2024.png",
+      "description": "Completion",
+      "recommended": false
+    },
+    {
+      "filename": "NAT-Provincial_English_2024.pdf",
+      "description": "Bronze Medal",
+      "recommended": false
+    },
+    {
+      "filename": "EFSET_2024.pdf",
+      "description": "B1 Intermediate",
+      "recommended": false
+    }
+  ],
+    "recommended_repos": [
+    "Project-Isla",
+    "VAVR-Robot-SE",
+    "Python_YouTube_Downloader_Project"
+  ]
+}
