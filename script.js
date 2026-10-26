@@ -9,6 +9,7 @@ let reposData = [];
 let certsData = [];
 let gistsData = [];
 let recommendedRepos = [];
+let recommendedGists = [];
 
 document.addEventListener("DOMContentLoaded", () => {
   setupTabs();
@@ -56,6 +57,7 @@ async function loadData() {
       } else {
         certsData = json.certs || [];
         recommendedRepos = json.recommended_repos || [];
+        recommendedGists = json.recommended_gists || [];
       }
     }
 
@@ -65,6 +67,13 @@ async function loadData() {
         const fileKeys = Object.keys(gist.files || {});
         const firstFile = fileKeys[0] || "Gist";
         const directImage = getDirectGistImageUrl(gist.files);
+
+        // Preload direct image into browser cache immediately if available
+        if (directImage) {
+          const preImg = new Image();
+          preImg.src = directImage;
+        }
+
         return {
           id: gist.id,
           filename: firstFile,
@@ -103,6 +112,8 @@ function loadRepoReadmeImagesInBackground() {
         );
         if (imageUrl) {
           repo.preview_image = imageUrl;
+          const preImg = new Image();
+          preImg.src = imageUrl;
           updateCardPreviewDOM(`repo-${repo.id}`, imageUrl, repo.name);
         }
       }
@@ -136,6 +147,9 @@ function loadGistImagesInBackground() {
         const imageUrl = extractFirstImageUrlFromGist(content, files);
         if (imageUrl) {
           gist.preview_image = imageUrl;
+          // Preload into browser image cache
+          const preImg = new Image();
+          preImg.src = imageUrl;
           updateCardPreviewDOM(`gist-${gist.id}`, imageUrl, gist.filename);
         }
       }
@@ -152,6 +166,8 @@ function loadCertPreviewsInBackground() {
 
     if (["png", "jpg", "jpeg", "webp", "gif"].includes(extension)) {
       item.preview_image = filePath;
+      const preImg = new Image();
+      preImg.src = filePath;
       updateCardPreviewDOM(safeId, filePath, item.filename);
     } else if (extension === "pdf" && !item.preview_image) {
       try {
@@ -179,7 +195,7 @@ function updateCardPreviewDOM(cardDataId, src, altText) {
     previewContainer.className = "card-preview";
     card.insertBefore(previewContainer, card.firstChild);
   }
-  previewContainer.innerHTML = `<img src="${src}" alt="${altText}" loading="lazy" onerror="this.closest('.card-preview')?.remove()">`;
+  previewContainer.innerHTML = `<img src="${src}" alt="${altText}" loading="lazy" onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\\'card-preview-fallback\\'>📝 <span>PREVIEW</span></div>'">`;
 }
 
 function renderPdfToDataUrl(url) {
@@ -305,7 +321,6 @@ function renderRepos(grid) {
 
     const cleanTitle = repo.name.replace(/[-_]/g, " ");
 
-    // Only render preview block if an image exists (no SVG fallback)
     const previewHtml = repo.preview_image
       ? `<div class="card-preview"><img src="${repo.preview_image}" alt="${cleanTitle}" loading="lazy" onerror="this.closest('.card-preview')?.remove()"></div>`
       : "";
@@ -386,7 +401,17 @@ function renderGists(grid) {
     return;
   }
 
-  gistsData.forEach((gist) => {
+  let filtered = [...gistsData];
+  const isGistRecommended = (g) =>
+    recommendedGists.some(
+      (name) =>
+        name.trim().toLowerCase() === g.filename.trim().toLowerCase() ||
+        name.trim().toLowerCase() === g.id.trim().toLowerCase()
+    );
+
+  filtered.sort((a, b) => (isGistRecommended(b) ? 1 : 0) - (isGistRecommended(a) ? 1 : 0));
+
+  filtered.forEach((gist) => {
     const card = document.createElement("a");
     card.href = gist.html_url;
     card.target = "_blank";
@@ -409,16 +434,30 @@ function renderGists(grid) {
       ? ""
       : `<p class="card-desc">${rawDesc}</p>`;
 
-    // Render preview block if an image exists (like repos)
-    const previewHtml = gist.preview_image
-      ? `<div class="card-preview"><img src="${gist.preview_image}" alt="${cleanTitle}" loading="lazy" onerror="this.closest('.card-preview')?.remove()"></div>`
-      : "";
+    // Determine extension or language tag for fallback preview
+    const extension = gist.filename.includes(".")
+      ? gist.filename.split(".").pop().toLowerCase()
+      : "gist";
+    const fileObj = gist.files ? gist.files[gist.filename] : null;
+    const langTag = (fileObj && fileObj.language) ? fileObj.language : extension.toUpperCase();
+
+    // Render consistent preview container like Certificates
+    let previewMedia = "";
+    if (gist.preview_image) {
+      previewMedia = `<img src="${gist.preview_image}" alt="${cleanTitle}" loading="lazy" onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\\'card-preview-fallback\\'>📝 <span>${langTag}</span></div>'">`;
+    } else {
+      previewMedia = `<div class="card-preview-fallback">📝 <span>${langTag}</span></div>`;
+    }
+
+    const isRecommended = isGistRecommended(gist);
+    const badgeHtml = isRecommended ? `<span class="badge badge-recommend">⭐ Recommended</span>` : "";
 
     card.innerHTML = `
-      ${previewHtml}
+      <div class="card-preview">${previewMedia}</div>
       <div class="card-body">
         <div class="card-header-row">
           <h3 class="card-title">${cleanTitle}</h3>
+          ${badgeHtml}
         </div>
         ${descHtml}
       </div>
