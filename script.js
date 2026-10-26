@@ -39,9 +39,9 @@ async function loadData() {
 
   try {
     const [reposResponse, certsResponse, gistsResponse] = await Promise.allSettled([
-      fetch(`https:api.github.com/users/${GITHUB_USERNAME}/repos?sort=updated&per_page=100`),
+      fetch(`https://api.github.com/users/${GITHUB_USERNAME}/repos?sort=updated&per_page=100`),
       fetch("data.json"),
-      fetch(`https:api.github.com/users/${GITHUB_USERNAME}/gists?per_page=100`),
+      fetch(`https://api.github.com/users/${GITHUB_USERNAME}/gists?per_page=100`),
     ]);
 
     if (reposResponse.status === "fulfilled" && reposResponse.value.ok) {
@@ -92,7 +92,7 @@ function loadRepoReadmeImagesInBackground() {
   reposData.forEach(async (repo) => {
     try {
       const readmeRes = await fetch(
-        `https:raw.githubusercontent.com/${repo.full_name}/${repo.default_branch}/README.md`
+        `https://raw.githubusercontent.com/${repo.full_name}/${repo.default_branch}/README.md`
       );
       if (readmeRes.ok) {
         const markdown = await readmeRes.text();
@@ -119,6 +119,7 @@ function loadGistImagesInBackground() {
     const fileNames = Object.keys(files);
     if (fileNames.length === 0) return;
 
+    // Prioritize markdown files, otherwise check the first file
     const mdFileName =
       fileNames.find((name) => {
         const lower = name.toLowerCase();
@@ -213,6 +214,7 @@ function extractFirstImageUrl(markdown, repoFullName, defaultBranch) {
 
   if (matches.length === 0) return null;
 
+  // Filter out status badge images
   const isBadge = (u) => /shields\.io|badgen\.net|travis-ci|codecov|github\.com\/[^\/]+\/[^\/]+\/workflows\/.*badge\.svg/i.test(u);
   const selected = matches.find((u) => !isBadge(u)) || matches[0];
 
@@ -262,6 +264,7 @@ function extractFirstImageUrlFromGist(content, files) {
     return url;
   }
 
+  // Handle relative image file names matching other files in the same gist
   const cleanPath = url.replace(/^\.\//, "").replace(/^\//, "");
   if (files && files[cleanPath] && files[cleanPath].raw_url) {
     return files[cleanPath].raw_url;
@@ -302,6 +305,7 @@ function renderRepos(grid) {
 
     const cleanTitle = repo.name.replace(/[-_]/g, " ");
 
+    // Only render preview block if an image exists (no SVG fallback)
     const previewHtml = repo.preview_image
       ? `<div class="card-preview"><img src="${repo.preview_image}" alt="${cleanTitle}" loading="lazy" onerror="this.closest('.card-preview')?.remove()"></div>`
       : "";
@@ -405,6 +409,7 @@ function renderGists(grid) {
       ? ""
       : `<p class="card-desc">${rawDesc}</p>`;
 
+    // Render preview block if an image exists (like repos)
     const previewHtml = gist.preview_image
       ? `<div class="card-preview"><img src="${gist.preview_image}" alt="${cleanTitle}" loading="lazy" onerror="this.closest('.card-preview')?.remove()"></div>`
       : "";
