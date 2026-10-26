@@ -62,12 +62,16 @@ async function loadData() {
     if (gistsResponse.status === "fulfilled" && gistsResponse.value.ok) {
       const rawGists = await gistsResponse.value.json();
       gistsData = rawGists.map((gist) => {
-        const firstFile = Object.keys(gist.files)[0] || "Gist";
+        const fileKeys = Object.keys(gist.files || {});
+        const firstFile = fileKeys[0] || "Gist";
+        const directImage = getDirectGistImageUrl(gist.files);
         return {
           id: gist.id,
           filename: firstFile,
           description: gist.description || "",
           html_url: gist.html_url,
+          files: gist.files || {},
+          preview_image: directImage || null,
         };
       });
     }
@@ -76,6 +80,7 @@ async function loadData() {
 
     loadRepoReadmeImagesInBackground();
     loadCertPreviewsInBackground();
+    loadGistImagesInBackground();
 
   } catch (err) {
     console.error("Error loading portal data:", err);
@@ -99,6 +104,39 @@ function loadRepoReadmeImagesInBackground() {
         if (imageUrl) {
           repo.preview_image = imageUrl;
           updateCardPreviewDOM(`repo-${repo.id}`, imageUrl, repo.name);
+        }
+      }
+    } catch (e) {
+    }
+  });
+}
+
+function loadGistImagesInBackground() {
+  gistsData.forEach(async (gist) => {
+    if (gist.preview_image) return;
+
+    const files = gist.files || {};
+    const fileNames = Object.keys(files);
+    if (fileNames.length === 0) return;
+
+    // Prioritize markdown files, otherwise check the first file
+    const mdFileName =
+      fileNames.find((name) => {
+        const lower = name.toLowerCase();
+        return lower.endsWith(".md") || lower.endsWith(".markdown");
+      }) || fileNames[0];
+
+    const targetFile = files[mdFileName];
+    if (!targetFile || !targetFile.raw_url) return;
+
+    try {
+      const res = await fetch(targetFile.raw_url);
+      if (res.ok) {
+        const content = await res.text();
+        const imageUrl = extractFirstImageUrlFromGist(content, files);
+        if (imageUrl) {
+          gist.preview_image = imageUrl;
+          updateCardPreviewDOM(`gist-${gist.id}`, imageUrl, gist.filename);
         }
       }
     } catch (e) {
@@ -135,10 +173,13 @@ function updateCardPreviewDOM(cardDataId, src, altText) {
   const card = document.querySelector(`[data-card-id="${cardDataId}"]`);
   if (!card) return;
 
-  const previewContainer = card.querySelector(".card-preview");
-  if (previewContainer) {
-    previewContainer.innerHTML = `<img src="${src}" alt="${altText}" loading="lazy">`;
+  let previewContainer = card.querySelector(".card-preview");
+  if (!previewContainer) {
+    previewContainer = document.createElement("div");
+    previewContainer.className = "card-preview";
+    card.insertBefore(previewContainer, card.firstChild);
   }
+  previewContainer.innerHTML = `<img src="${src}" alt="${altText}" loading="lazy" onerror="this.closest('.card-preview')?.remove()">`;
 }
 
 function renderPdfToDataUrl(url) {
@@ -160,17 +201,24 @@ function renderPdfToDataUrl(url) {
 
 function extractFirstImageUrl(markdown, repoFullName, defaultBranch) {
   if (!markdown) return null;
-  const mdMatch = markdown.match(/!\[.*?\]\((.*?)\)/);
-  const htmlMatch = markdown.match(/<img[^>]+src=["']([^"']+)["']/i);
 
-  let url = mdMatch
-    ? mdMatch[1].trim()
-    : htmlMatch
-      ? htmlMatch[1].trim()
-      : null;
-  if (!url) return null;
+  const matches = [];
+  const mdMatches = markdown.matchAll(/!\[.*?\]\((.*?)\)/g);
+  for (const m of mdMatches) {
+    matches.push(m[1].trim());
+  }
+  const htmlMatches = markdown.matchAll(/<img[^>]+src=["']([^"']+)["']/gi);
+  for (const m of htmlMatches) {
+    matches.push(m[1].trim());
+  }
 
-  url = url.split(" ")[0].replace(/^<|>$/g, "");
+  if (matches.length === 0) return null;
+
+  // Filter out status badge images
+  const isBadge = (u) => /shields\.io|badgen\.net|travis-ci|codecov|github\.com\/[^\/]+\/[^\/]+\/workflows\/.*badge\.svg/i.test(u);
+  const selected = matches.find((u) => !isBadge(u)) || matches[0];
+
+  let url = selected.split(" ")[0].replace(/^<|>$/g, "");
 
   if (url.startsWith("http://") || url.startsWith("https://")) {
     return url;
@@ -178,6 +226,51 @@ function extractFirstImageUrl(markdown, repoFullName, defaultBranch) {
 
   const cleanPath = url.replace(/^\.\//, "").replace(/^\//, "");
   return `https://raw.githubusercontent.com/${repoFullName}/${defaultBranch}/${cleanPath}`;
+}
+
+function getDirectGistImageUrl(files) {
+  if (!files) return null;
+  const imageExtensions = [".png", ".jpg", ".jpeg", ".gif", ".webp", ".svg"];
+  for (const [filename, fileObj] of Object.entries(files)) {
+    const lower = filename.toLowerCase();
+    if (imageExtensions.some((ext) => lower.endsWith(ext))) {
+      return fileObj.raw_url;
+    }
+  }
+  return null;
+}
+
+function extractFirstImageUrlFromGist(content, files) {
+  if (!content) return null;
+
+  const matches = [];
+  const mdMatches = content.matchAll(/!\[.*?\]\((.*?)\)/g);
+  for (const m of mdMatches) {
+    matches.push(m[1].trim());
+  }
+  const htmlMatches = content.matchAll(/<img[^>]+src=["']([^"']+)["']/gi);
+  for (const m of htmlMatches) {
+    matches.push(m[1].trim());
+  }
+
+  if (matches.length === 0) return null;
+
+  const isBadge = (u) => /shields\.io|badgen\.net/i.test(u);
+  const selected = matches.find((u) => !isBadge(u)) || matches[0];
+
+  let url = selected.split(" ")[0].replace(/^<|>$/g, "");
+
+  if (url.startsWith("http://") || url.startsWith("https://")) {
+    return url;
+  }
+
+  // Handle relative image file names matching other files in the same gist
+  const cleanPath = url.replace(/^\.\//, "").replace(/^\//, "");
+  if (files && files[cleanPath] && files[cleanPath].raw_url) {
+    return files[cleanPath].raw_url;
+  }
+
+  return null;
 }
 
 function renderContent() {
@@ -212,23 +305,16 @@ function renderRepos(grid) {
 
     const cleanTitle = repo.name.replace(/[-_]/g, " ");
 
-    const previewMedia = repo.preview_image
-      ? `<img src="${repo.preview_image}" alt="${cleanTitle}" loading="lazy">`
-      : `<div class="card-preview-fallback git-fallback">
-      <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <line x1="6" y1="3" x2="6" y2="15"></line>
-        <circle cx="18" cy="6" r="3"></circle>
-        <circle cx="6" cy="18" r="3"></circle>
-        <path d="M18 9a9 9 0 0 1-9 9"></path>
-      </svg>
-      <span>Repository</span>
-    </div>`;
+    // Only render preview block if an image exists (no SVG fallback)
+    const previewHtml = repo.preview_image
+      ? `<div class="card-preview"><img src="${repo.preview_image}" alt="${cleanTitle}" loading="lazy" onerror="this.closest('.card-preview')?.remove()"></div>`
+      : "";
 
     const isRecommended = isRepoRecommended(repo);
     const badgeHtml = isRecommended ? `<span class="badge badge-recommend">⭐ Recommended</span>` : "";
 
     card.innerHTML = `
-      <div class="card-preview">${previewMedia}</div>
+      ${previewHtml}
       <div class="card-body">
         <div class="card-header-row">
           <h3 class="card-title">${cleanTitle}</h3>
@@ -323,9 +409,16 @@ function renderGists(grid) {
       ? ""
       : `<p class="card-desc">${rawDesc}</p>`;
 
+    const previewHtml = gist.preview_image
+      ? `<div class="card-preview"><img src="${gist.preview_image}" alt="${cleanTitle}" loading="lazy" onerror="this.closest('.card-preview')?.remove()"></div>`
+      : "";
+
     card.innerHTML = `
+      ${previewHtml}
       <div class="card-body">
-        <h3 class="card-title">${cleanTitle}</h3>
+        <div class="card-header-row">
+          <h3 class="card-title">${cleanTitle}</h3>
+        </div>
         ${descHtml}
       </div>
     `;
